@@ -708,3 +708,36 @@ def export_data():
     response.headers['Content-Disposition'] = 'attachment; filename=service_requests.csv'
     response.headers['Content-Type'] = 'text/csv'
     return response
+
+def is_professional():
+    return any(role.name == "Service Professional" for role in current_user.roles)
+
+@app.route("/professional-dashboard", methods=["GET"])
+@auth_required('token')
+def professional_stats_overview():
+    if not is_professional():
+        return jsonify({"error": "Unauthorized"}), 403
+
+    try:
+        professional_id = current_user.id  # Logged-in professional ID
+
+        stats = {
+            "total_requests": ServiceRequests.query.filter_by(service_professional_id=professional_id).count(),
+            "pending_requests": ServiceRequests.query.filter_by(service_professional_id=professional_id, service_status="requested").count(),
+            "accepted_requests": ServiceRequests.query.filter_by(service_professional_id=professional_id, service_status="assigned").count(),
+            "completed_requests": ServiceRequests.query.filter_by(service_professional_id=professional_id, service_status="completed").count(),
+            "closed_requests": ServiceRequests.query.filter_by(service_professional_id=professional_id, service_status="closed").count(),
+            "avg_rating": round(
+                db.session.query(func.avg(ServiceRequests.rating))
+                .filter_by(service_professional_id=professional_id)
+                .scalar() or 0, 1),  # Default to 0 if no ratings exist
+            "past_clients": db.session.query(ServiceRequests.customer_id)
+                .filter_by(service_professional_id=professional_id)
+                .distinct()
+                .count()
+        }
+
+        return jsonify(stats), 200
+
+    except Exception as e:
+        return jsonify({"message": "Error fetching stats", "error": str(e)}), 500

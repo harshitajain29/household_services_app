@@ -2,11 +2,8 @@ const Home = {
     template : `<h1> this is home </h1>`
 }
 import AdminDashboardPage from "../pages/AdminDashboardPage.js";
-// import BlogsListPage from "../pages/BlogsListPage.js";
-// import DisplayBlogPage from "../pages/DisplayBlogPage.js";
 import LoginPage from "../pages/LoginPage.js";
 import RegisterPage from "../pages/RegisterPage.js";
-// import ExploreUsersPage from "../pages/ExploreUsersPage.js";
 import CreateService from "../pages/CreateService.js"
 import CustomerLanding from "../pages/CustomerLanding.js";
 import ServiceProfessionalsPage from "../pages/ServiceProfessionalsPage.js";
@@ -16,6 +13,7 @@ import ProfessionalRequests from "../pages/ProfessionalRequests.js";
 import AdminServicesTable from "../pages/AdminServicesTable.js";
 import ViewUsers from "../pages/ViewUsers.js";
 import AdminStats from "../pages/AdminStats.js";
+import ProfessionalDashbord from "../pages/ProfessionalDashboard.js";
 import store from './store.js';
 
 
@@ -23,7 +21,7 @@ import store from './store.js';
 Vue.use(VueRouter);
 
 const routes = [
-    {path : '/', component : Home},
+    {path: '/', redirect: '/login'},
     {path : '/login', component : LoginPage},
     {path : '/register', component : RegisterPage},
     // {path : '/feed', component : BlogsListPage, meta : {requiresLogin : true}},
@@ -33,6 +31,7 @@ const routes = [
     {path : '/admin-dashboard', component : AdminDashboardPage, meta : {requiresLogin : true, role : "admin"}},
     { path: '/customerlanding', component: CustomerLanding, meta: { requiresLogin: true, role: "Customer" } },
     { path: '/customer-requests', component: CustomerRequests, meta: { requiresLogin: true, role: "Customer" } },
+    { path: '/professional-dashboard', component: ProfessionalDashbord, meta: { requiresLogin: true, role: "Service Professional" } },
     { path: '/professional-requests', component: ProfessionalRequests, meta: { requiresLogin: true, role: "Service Professional" } },
     { path: '/custservicebook', component: CustServiceBook, meta: { requiresLogin: true, role: "Customer" } },
     { path: '/admin/users', component: ViewUsers, meta: { requiresLogin: true, role: "admin" } },

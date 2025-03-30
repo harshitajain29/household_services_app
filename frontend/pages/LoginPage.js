@@ -97,7 +97,7 @@ export default {
         // Redirect Based on Role
         if (data.role === "admin") this.$router.push("/admin-dashboard");
         else if (data.role === "Customer") this.$router.push("/customerlanding");
-        else if (data.role === "Service Professional") this.$router.push("/professional-requests");
+        else if (data.role === "Service Professional") this.$router.push("/professional-dashboard");
         else this.$router.push("/");
 
       } catch (error) {
