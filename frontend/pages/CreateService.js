@@ -4,9 +4,8 @@ export default {
             service: {
                 name: '',
                 description: '',
-                base_price: '',
-                time_required: ''
-                
+                min_time_required: '',
+                base_payment: ''
             },
             message: null,
             category: null
@@ -17,9 +16,7 @@ export default {
         async submitForm() {
             console.log("inside submit form")
             try {
-                console.log("Inside first try block")
-                const token = localStorage.getItem('token');
-                console.log("Token received: ", token)
+                const token = JSON.parse(localStorage.getItem('user')).token;
                 if (!token) {
                     this.message = "Unauthorized: No token found.";
                     this.category = "danger";
@@ -31,22 +28,21 @@ export default {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authentication-Token': token
+                        'Authentication-Token': `${token}`
                     },
                     
                     body: JSON.stringify({
                         name: this.service.name,
                         description: this.service.description,
-                        base_price: this.service.base_price,
-                        time_required: this.service.time_required,
-                        
+                        min_time_required: this.service.min_time_required,
+                        base_payment: this.service.base_payment
                     })
                 });
   
                 if (response.ok) {
                     this.message = "Service created successfully!";
                     this.category = "success";
-                    this.service = { name: '', description: '', base_price: '', time_required: '' }; // Reset form
+                    this.service = { name: '', description: '', min_time_required: '', base_payment: '' }; // Reset form
                 } else {
                     const errorData = await response.json();
                     this.message = errorData.message || "An error occurred.";
@@ -59,38 +55,55 @@ export default {
         }
     },
     template: `
-        <div class="row">
-            <div class="col-md-4 offset-md-4">
-                <h3>Create New Service</h3>
+        <div class="container d-flex justify-content-center align-items-center vh-100" 
+             style="background: linear-gradient(135deg, #4567b7, #6495ed);">
+            <div class="card p-4 shadow-lg text-center" style="width: 400px; border-radius: 10px;">
+                <h3 class="text-center text-primary mb-4">Create New Service</h3>
                 
                 <div v-if="message" :class="'alert alert-' + category" role="alert">
                     {{ message }}
                 </div>
   
                 <form @submit.prevent="submitForm">
-                    <div class="form-group">
-                        <label for="name">Service Name</label>
-                        <input type="text" id="name" v-model="service.name" class="form-control" required>
+                    <div class="form-group mb-3">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Service Name:</span>
+                            </div>
+                            <input type="text" v-model="service.name" class="form-control" required>
+                        </div>
                     </div>
   
-                    <div class="form-group">
-                        <label for="description">Description</label>
-                        <textarea id="description" v-model="service.description" class="form-control" required></textarea>
+                    <div class="form-group mb-3">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Description:</span>
+                            </div>
+                            <textarea v-model="service.description" class="form-control" required></textarea>
+                        </div>
                     </div>
   
-                    <div class="form-group">
-                        <label for="min_time_required">Time Required (minutes)</label>
-                        <input type="number" id="time_required" v-model="service.time_required" class="form-control" required>
+                    <div class="form-group mb-3">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Min Time Required (minutes):</span>
+                            </div>
+                            <input type="number" v-model="service.min_time_required" class="form-control" required>
+                        </div>
                     </div>
   
-                    <div class="form-group">
-                        <label for="base_payment">Base Price</label>
-                        <input type="number" id="base_payment" v-model="service.base_price" class="form-control" required>
+                    <div class="form-group mb-3">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Base Payment:</span>
+                            </div>
+                            <input type="number" v-model="service.base_payment" class="form-control" required>
+                        </div>
                     </div>
   
                     <div class="form-group text-center">
-                        <button type="submit" class="btn btn-primary btn-sm">Create</button>
-                        <router-link to="/admin-dashboard" class="btn btn-secondary btn-sm">Cancel</router-link>
+                        <button type="submit" class="btn btn-primary w-100 mb-3">Create</button>
+                        <router-link to="/admin-dashboard" class="btn btn-secondary w-100">Cancel</router-link>
                     </div>
                 </form>
             </div>

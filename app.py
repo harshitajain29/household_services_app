@@ -1,37 +1,59 @@
 from flask import Flask
+# from flask_login import login_required
 from backend.config import LocalDevelopmentConfig
-from backend.models import db, User, Role
+from backend.models import db, Users, Roles
 from flask_security import Security, SQLAlchemyUserDatastore, auth_required
-# from backend.resources import api
+from flask_caching import Cache
+from backend.celery.celery_factory import celery
+import flask_excel as excel
+from backend.celery.tasks import *
+
 def createApp():
-    app = Flask(__name__, template_folder='frontend', static_folder='frontend', static_url_path='/static')
+    print("Creating Flask app...") 
+    app = Flask(__name__, template_folder='frontend', static_folder='frontend', static_url_path='/')
 
+    celery.conf.update(
+        broker_url='redis://localhost:6379/0',
+        result_backend='redis://localhost:6379/1',
+        timezone = 'Asia/Kolkata'
+    )
     app.config.from_object(LocalDevelopmentConfig)
-    #model init 
-    db.init_app(app)
+    print("Configuration loaded.") 
 
-    #flask-restful init 
-    # api.init_app(app)
+    
+    # model init
+    db.init_app(app)
+    print("Database initialized.")
+    
+    # cache init
+    cache = Cache(app)
+    app.cache = cache
+
 
     #flask security
-    datastore = SQLAlchemyUserDatastore(db, User, Role)
+    datastore = SQLAlchemyUserDatastore(db, Users, Roles)
+    # app.cache = cache
 
-    app.security = Security(app,datastore=datastore, register_blueprint=False) #Disables the default behavior
+    app.security = Security(app, datastore= datastore, register_blueprint=False)
     app.app_context().push()
 
+    print("Flask-Security initialized.")
+    
     return app
-
+print("Starting app creation...")
 app = createApp()
+
+# celery_app = celery_init_app(app)
+
 import backend.create_initial_data
+
 import backend.routes
 
-# @app.get('/')
-# def home():
-#     return render_template('index.html')
+# import backend.celery.celery_schedule
 
-# @app.get('/protected')
-# @auth_required()
-# def protected():
-#     return '<h1>only accessed by auth users</h1>'
-if (__name__ == '__main__'):
-    app.run(debug=True)
+excel.init_excel(app)
+
+if __name__ == '__main__':
+    print("Running Flask app...")  # Add this line
+    app.run()
+   
